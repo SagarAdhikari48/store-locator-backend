@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
 import type { AuthRequest } from "../middlewares/auth.middlewares.js";
+import type { CreateBusinessInput } from "../schema/business.schema.js";
 
 export const getAllBusiness = async (req: Request, res: Response) => {
   try {
@@ -13,8 +14,8 @@ export const getAllBusiness = async (req: Request, res: Response) => {
 
 export const createBusiness = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, type, latitude, longitude, address } = req.body;
-
+    const { name, type, latitude, longitude, address } =
+      req.body as CreateBusinessInput;
     if (!req.user) {
       return res.status(401).json({
         message: "Unauthorized!",
