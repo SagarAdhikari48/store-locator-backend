@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Define a User model
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // A user can have many businesses (one-to-many relation)
+  businesses Business[]
+}
+
+// Define a Business model
+model Business {
+  id          String   @id @default(uuid())
+  name        String
+  type        BusinessType
+  latitude    Float
+  longitude   Float
+  address     String
+  createdAt   DateTime @default(now())
+  ownerId     String // Foreign key linking to User
+  owner       User    @relation(fields: [ownerId], references: [id])
+}
+
+// Define a Role enum for user roles
+enum Role {
+  CUSTOMER
+  OWNER
+  ADMIN
+}
+
+// Define BusinessType enum
+enum BusinessType {
+  RESTAURANT
+  STORE
+  MART
+}
