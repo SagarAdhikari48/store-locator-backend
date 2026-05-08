@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
+import type { AuthRequest } from "../middlewares/auth.middlewares.js";
 
 export const getAllBusiness = async (req: Request, res: Response) => {
   try {
@@ -10,9 +11,15 @@ export const getAllBusiness = async (req: Request, res: Response) => {
   }
 };
 
-export const createBusiness = async (req: Request, res: Response) => {
+export const createBusiness = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, type, latitude, longitude, address, ownerId } = req.body;
+    const { name, type, latitude, longitude, address } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized!",
+      });
+    }
 
     const business = await prisma.business.create({
       data: {
@@ -21,11 +28,14 @@ export const createBusiness = async (req: Request, res: Response) => {
         latitude,
         longitude,
         address,
-        ownerId,
+        ownerId: req.user?.userId,
       },
     });
-    res.status(201).json(business);
+    res.status(201).json({
+      message: "Business created successfully",
+      data: business,
+    });
   } catch (error) {
-    res.status(500).json({ error: `Failed to create business !: ${error}` });
+    res.status(500).json({ message: `Failed to create business !: ${error}` });
   }
 };
