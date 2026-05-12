@@ -9,3 +9,7 @@ export const createBusinessSchema = z.object({
 });
 
 export type CreateBusinessInput = z.infer<typeof createBusinessSchema>;
+
+export const updateBusinessSchema = createBusinessSchema.partial();
+
+export type UpdateBusinessDto = z.infer<typeof updateBusinessSchema>;
