@@ -17,7 +17,7 @@ import {
 
 const router = Router();
 
-router.get("/businesses", getAllBusiness);
+router.get("/all", getAllBusiness);
 
 router.post(
   "/register",

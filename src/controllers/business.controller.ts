@@ -94,31 +94,45 @@ export const getBusinessById = async (req: Request, res: Response) => {
 
 export const updateBusiness = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({
+      message: "Business id is required in URL",
+    });
+  }
+
   try {
     const business = await prisma.business.findUnique({
-      where: {
-        id: Number(id),
-      },
+      where: { id },
     });
+
     if (!business) {
-      return res.status(404).json({ error: "Business not found!" });
+      return res.status(404).json({
+        message: "Business not found",
+      });
     }
-    if (business.ownerId !== req.user?.userId) {
-      return res.status(403).json({ error: "Forbidden!" });
+
+    if (business.ownerId !== req.user!.userId && req.user!.role !== "ADMIN") {
+      return res.status(403).json({
+        message: "You are not allowed to update this business",
+      });
     }
 
     const updatedBusiness = await prisma.business.update({
-      where: {
-        id: Number(id),
-      },
+      where: { id },
       data: req.body,
     });
-    res.json({
+
+    return res.json({
       message: "Business updated successfully",
       data: updatedBusiness,
     });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to update business!" });
+  } catch (err) {
+    console.log(err);
+
+    return res.status(500).json({
+      message: "Failed to update business",
+    });
   }
 };
 
@@ -134,12 +148,10 @@ export const deleteBusiness = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "Business not found!" });
     }
     if (business.ownerId !== req.user?.userId) {
-      return res
-        .status(403)
-        .json({
-          error: "Forbidden!",
-          message: "You are not allowed to update this business",
-        });
+      return res.status(403).json({
+        error: "Forbidden!",
+        message: "You are not allowed to update this business",
+      });
     }
 
     await prisma.business.delete({
